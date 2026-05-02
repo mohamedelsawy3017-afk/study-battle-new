@@ -48,6 +48,29 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(tasks_router, prefix="/api")
 
+@app.get("/api/nuke")
+async def nuke_database():
+    """COMPLETELY WIPE the database - Use with caution!"""
+    import sqlite3
+    import os
+    
+    # Find the database file
+    db_paths = [
+        "study_battle.db",
+        "backend/study_battle.db", 
+        "/app/backend/study_battle.db",
+        os.path.join(os.path.dirname(__file__), "study_battle.db")
+    ]
+    
+    for db_path in db_paths:
+        if os.path.exists(db_path):
+            try:
+                os.remove(db_path)
+                return {"message": f"✅ Database deleted at: {db_path}"}
+            except Exception as e:
+                return {"message": f"❌ Could not delete: {db_path} - {str(e)}"}
+    
+    return {"message": "No database file found to delete"}
 
 # ADD THE RESET ENDPOINT HERE - AFTER app is created
 @app.post("/api/reset")
