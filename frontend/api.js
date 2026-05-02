@@ -17,20 +17,42 @@ function authHeaders() {
 }
 
 async function request(method, path, body = null) {
-  const opts = { method, headers: authHeaders() };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(`${API_BASE}${path}`, opts);
-  if (res.status === 401) {
-    clearToken();
-    clearUser();
-    window.location.href = "/login.html";
-    return;
-  }
-  if (res.status === 204) return null;
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || "Something went wrong");
-  return data;
+    const opts = { method, headers: authHeaders() };
+    if (body) opts.body = JSON.stringify(body);
+    
+    try {
+        const res = await fetch(`${API_BASE}${path}`, opts);
+        
+        // Only redirect on 401 for specific endpoints (not login/register)
+        if (res.status === 401 && !path.includes('/auth/')) {
+            clearToken();
+            clearUser();
+            window.location.href = "/login.html";
+            return;
+        }
+        
+        if (res.status === 204) return null;
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            // Return error instead of throwing for auth endpoints
+            if (path.includes('/auth/')) {
+                return Promise.reject(new Error(data.detail || "Authentication failed"));
+            }
+            throw new Error(data.detail || "Something went wrong");
+        }
+        
+        return data;
+        
+    } catch (error) {
+        if (path.includes('/auth/')) {
+            return Promise.reject(error);
+        }
+        throw error;
+    }
 }
+
 
 const api = {
   // Auth

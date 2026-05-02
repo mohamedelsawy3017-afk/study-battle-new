@@ -256,25 +256,61 @@
       document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
     };
 
-    window.handleLogin = async () => {
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-      const errEl = document.getElementById('login-error');
-      try {
-        errEl.classList.remove('show');
-        const btn = document.querySelector('#login-form .btn');
-        btn.disabled = true; btn.textContent = 'Grinding... ⚙️';
-        const res = await api.login({ email, password });
-        setToken(res.access_token);
-        setUser({ id: res.user_id, username: res.username });
-        window.location.href = '/dashboard.html';
-      } catch (e) {
-        errEl.textContent = e.message;
+window.handleLogin = async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    
+    // Clear previous error
+    errEl.classList.remove('show');
+    errEl.textContent = '';
+    
+    // Validate inputs
+    if (!email || !password) {
+        errEl.textContent = 'Please enter both email and password';
         errEl.classList.add('show');
-        const btn = document.querySelector('#login-form .btn');
-        btn.disabled = false; btn.textContent = "Let's Battle 🔥";
-      }
-    };
+        return;
+    }
+    
+    const btn = document.querySelector('#login-form .btn');
+    const originalText = btn.textContent;
+    
+    try {
+        btn.disabled = true;
+        btn.textContent = 'Grinding... ⚙️';
+        
+        const res = await api.login({ email, password });
+        
+        // Check if login was successful
+        if (res && res.access_token) {
+            setToken(res.access_token);
+            setUser({ id: res.user_id, username: res.username });
+            window.location.href = '/dashboard.html';
+        } else {
+            throw new Error('Invalid response from server');
+        }
+        
+    } catch (e) {
+        // Handle different error types
+        let errorMessage = 'Login failed. Please try again.';
+        
+        if (e.message.includes('401') || e.message.includes('Unauthorized')) {
+            errorMessage = '❌ Incorrect email or password. Please try again.';
+        } else if (e.message.includes('NetworkError') || e.message.includes('fetch')) {
+            errorMessage = '⚠️ Network error. Please check your connection.';
+        } else if (e.message) {
+            errorMessage = e.message;
+        }
+        
+        errEl.textContent = errorMessage;
+        errEl.classList.add('show');
+        
+        // Don't redirect - stay on login page
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+};
+
 
     window.handleRegister = async () => {
       const username = document.getElementById('reg-username').value.trim();
