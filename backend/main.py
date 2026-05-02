@@ -9,7 +9,22 @@ import os
 from core.config import settings
 from database.session import create_tables
 from routers import auth_router, users_router, tasks_router
+# Add this after your existing imports
+from database.session import AsyncSessionLocal
+from models.user import User
+from models.task import Task
+from sqlalchemy import delete
 
+@app.post("/api/reset")
+async def reset_database():
+    """Delete all users and tasks (for testing)"""
+    async with AsyncSessionLocal() as db:
+        # Delete all tasks first (due to foreign key)
+        await db.execute(delete(Task))
+        # Delete all users
+        await db.execute(delete(User))
+        await db.commit()
+    return {"message": "✅ All data cleared! Database is now empty."}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
