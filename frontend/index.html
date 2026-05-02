@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Study Battle</title>
+</head>
+<body>
+  <script>
+    // Simple redirect based on auth state
+    const token = localStorage.getItem("sb_token");
+    window.location.href = token ? "/dashboard.html" : "/login.html";
+  </script>
+</body>
+</html>

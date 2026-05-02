@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Battle — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --surface2: #1c1c28;
+      --surface3: #22222f;
+      --border: #2a2a3a;
+      --accent: #7c5cfc;
+      --accent-glow: rgba(124,92,252,0.2);
+      --accent2: #fc5c7d;
+      --accent3: #5cf8c8;
+      --yellow: #fcd45c;
+      --text: #f0f0ff;
+      --muted: #8888aa;
+      --success: #5cf8c8;
+      --danger: #fc5c7d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      background: rgba(19,19,26,0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-family: 'DM Mono', monospace;
+      color: var(--accent3);
+    }
+    .nav-username { font-weight: 500; font-size: 14px; }
+    .btn-logout {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ─── LAYOUT ─── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+    @media (max-width: 900px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .icon { font-size: 20px; }
+
+    /* ─── STATS STRIP ─── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 600px) { .stats-strip { grid-template-columns: repeat(2,1fr); } }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ─── TASK INPUT ─── */
+    .task-input-area {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .task-input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .task-input-row input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .task-input-row input:focus { border-color: var(--accent); }
+    .task-input-row input::placeholder { color: var(--muted); }
+
+    .task-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .task-meta input[type="number"] {
+      width: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      outline: none;
+    }
+    .task-meta input[type="number"]:focus { border-color: var(--accent); }
+    .task-meta label { font-size: 13px; color: var(--muted); }
+
+    .btn-add {
+      background: linear-gradient(135deg, var(--accent), #5a3fc0);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      color: white;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,92,252,0.4); }
+
+    /* ─── TASK LIST ─── */
+    .task-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .task-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+      animation: taskSlideIn 0.3s ease;
+    }
+    @keyframes taskSlideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .task-item:hover { border-color: var(--border); background: var(--surface3); }
+    .task-item.done { opacity: 0.5; }
+    .task-item.done .task-title { text-decoration: line-through; }
+
+    .task-check {
+      width: 22px; height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+    }
+    .task-check:hover { border-color: var(--accent3); }
+    .task-item.done .task-check { background: var(--accent3); border-color: var(--accent3); color: #000; }
+
+    .task-info { flex: 1; min-width: 0; }
+    .task-title { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .task-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .task-time {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--accent3);
+      white-space: nowrap;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      line-height: 1;
+    }
+    .btn-delete:hover { color: var(--danger); background: rgba(252,92,125,0.1); }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .empty-state .emoji { font-size: 40px; display: block; margin-bottom: 10px; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+    /* ─── BATTLE STATUS ─── */
+    .battle-status {
+      background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(252,92,125,0.05));
+      border: 1px solid rgba(124,92,252,0.3);
+      border-radius: 20px;
+      padding: 20px;
+    }
+    .battle-message {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    /* ─── FRIEND COMPARE ─── */
+    .compare-input {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .compare-input input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      outline: none;
+    }
+    .compare-input input:focus { border-color: var(--accent); }
+    .btn-compare {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-compare:hover { background: #6a4ae0; }
+
+    .vs-area { display: flex; flex-direction: column; gap: 12px; }
+    .vs-player { }
+    .vs-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .progress-bar-wrap {
+      background: var(--surface2);
+      border-radius: 100px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .fill-me { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .fill-friend { background: linear-gradient(90deg, var(--accent3), #2af8a0); }
+
+    .vs-divider {
+      text-align: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+
+    /* ─── LEADERBOARD ─── */
+    .leaderboard-list { display: flex; flex-direction: column; gap: 8px; }
+    .lb-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      transition: all 0.2s;
+      animation: fadeIn 0.3s ease both;
+    }
+    .lb-row:hover { border-color: var(--accent); }
+    .lb-row.is-me { border-color: var(--accent); background: var(--accent-glow); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .lb-rank {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      width: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .lb-rank.top-1 { color: var(--yellow); font-weight: 700; }
+    .lb-rank.top-2 { color: #c0c0d0; }
+    .lb-rank.top-3 { color: #cd7f32; }
+
+    .lb-info { flex: 1; }
+    .lb-name { font-size: 13px; font-weight: 600; }
+    .lb-badge { font-size: 11px; color: var(--muted); }
+
+    .lb-score {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--accent3);
+      text-align: right;
+    }
+    .lb-score-label { font-size: 10px; color: var(--muted); }
+
+    /* ─── LEVEL PROGRESS ─── */
+    .level-section { text-align: center; padding: 4px 0; }
+    .level-badge {
+      display: inline-block;
+      font-size: 32px;
+      margin-bottom: 8px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    .level-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .level-score { font-size: 13px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 20px;
+      font-size: 14px;
+      z-index: 999;
+      display: none;
+      animation: toastIn 0.3s ease;
+      max-width: 280px;
+    }
+    .toast.show { display: block; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .toast.success { border-color: var(--success); }
+    .toast.error { border-color: var(--danger); }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav>
+    <span class="nav-logo">⚔️ Study Battle</span>
+    <div class="nav-user">
+      <span class="nav-badge" id="nav-badge">...</span>
+      <span class="nav-username" id="nav-username">...</span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- MAIN -->
+  <div class="main-grid">
+    <!-- LEFT: Tasks + Stats -->
+    <div>
+      <!-- Stats Strip -->
+      <div class="stats-strip">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-score" style="color:var(--accent)">—</div>
+          <div class="stat-label">⏱ Minutes Studied</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-level" style="color:var(--yellow)">—</div>
+          <div class="stat-label">🏅 Level</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-done" style="color:var(--accent3)">—</div>
+          <div class="stat-label">✅ Tasks Done</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-pending" style="color:var(--accent2)">—</div>
+          <div class="stat-label">📋 Pending</div>
+        </div>
+      </div>
+
+      <!-- Tasks Panel -->
+      <div class="card">
+        <div class="card-title"><span class="icon">📚</span> Study Tasks</div>
+
+        <!-- Add Task -->
+        <div class="task-input-area">
+          <div class="task-input-row">
+            <input type="text" id="task-title" placeholder="What are you studying? (e.g. Chapter 5 Calculus)" />
+          </div>
+          <div class="task-meta">
+            <label>⏱ Est. minutes:</label>
+            <input type="number" id="task-mins" value="25" min="1" max="480" />
+            <input type="text" id="task-desc" placeholder="Optional notes..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;" />
+            <button class="btn-add" onclick="addTask()">+ Add Task</button>
+          </div>
+        </div>
+
+        <!-- Task List -->
+        <div class="task-list" id="task-list">
+          <div class="empty-state">
+            <span class="emoji">💤</span>
+            <div>No tasks yet. Stop slacking! 😤</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div class="sidebar">
+      <!-- Level Card -->
+      <div class="card">
+        <div class="level-section">
+          <div class="level-badge" id="level-emoji">🐣</div>
+          <div class="level-name" id="level-name">Rookie</div>
+          <div class="level-score" id="level-score">0 mins studied</div>
+        </div>
+      </div>
+
+      <!-- Battle Status -->
+      <div class="battle-status">
+        <div class="card-title" style="margin-bottom:12px"><span class="icon">🔥</span> Battle Status</div>
+
+        <div class="card-title" style="font-size:13px;margin-bottom:8px;color:var(--muted)">👥 Friend Comparison</div>
+        <div class="compare-input">
+          <input type="text" id="friend-username" placeholder="Friend's username" />
+          <button class="btn-compare" onclick="loadFriend()">Search</button>
+        </div>
+
+        <div class="vs-area" id="vs-area" style="display:none">
+          <div class="vs-player">
+            <div class="vs-name">
+              <span id="me-name">You</span>
+              <span id="me-score" style="color:var(--accent3);font-family:'DM Mono',monospace">0 min</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill fill-me" id="me-bar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="vs-divider">VS</div>
+          <div class="vs-player">
+            <div class="vs-name">
+              <span id="friend-name">Friend</span>
+              <span id="friend-score" style="color:var(--accent3);font-family:'DM Mono',monospace">0 min</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill fill-friend" id="friend-bar" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div class="battle-message" id="battle-msg" style="margin-top:12px">⚔️ Let the battle begin!</div>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🏆</span> Leaderboard</div>
+        <div class="leaderboard-list" id="leaderboard-list">
+          <div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api, getToken, getUser, clearToken, clearUser } from '/api.js';
+
+    // Guard: must be logged in
+    if (!getToken()) window.location.href = '/login.html';
+
+    const currentUser = getUser();
+    let myStats = null;
+
+    // ── Toast helper ──
+    function toast(msg, type = 'success') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `toast show ${type}`;
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // ── Logout ──
+    window.logout = () => { clearToken(); clearUser(); window.location.href = '/login.html'; };
+
+    // ── Load Stats ──
+    async function loadStats() {
+      try {
+        myStats = await api.getMyStats();
+        document.getElementById('nav-username').textContent = myStats.username;
+        document.getElementById('nav-badge').textContent = myStats.badge;
+        document.getElementById('stat-score').textContent = Math.round(myStats.study_score);
+        document.getElementById('stat-level').textContent = `Lv.${myStats.level}`;
+        document.getElementById('stat-done').textContent = myStats.completed_tasks;
+        document.getElementById('stat-pending').textContent = myStats.pending_tasks;
+
+        const emoji = myStats.badge.match(/\p{Emoji}/u)?.[0] || '📚';
+        document.getElementById('level-emoji').textContent = emoji;
+        document.getElementById('level-name').textContent = myStats.badge;
+        document.getElementById('level-score').textContent = `${Math.round(myStats.study_score)} mins studied`;
+      } catch(e) { console.error(e); }
+    }
+
+    // ── Load Tasks ──
+    async function loadTasks() {
+      try {
+        const tasks = await api.getTasks();
+        renderTasks(tasks);
+      } catch(e) { console.error(e); }
+    }
+
+    function renderTasks(tasks) {
+      const container = document.getElementById('task-list');
+      if (!tasks.length) {
+        container.innerHTML = `<div class="empty-state"><span class="emoji">💤</span><div>No tasks yet. Stop slacking! 😤</div></div>`;
+        return;
+      }
+      container.innerHTML = tasks.map(t => `
+        <div class="task-item ${t.is_done ? 'done' : ''}" id="task-${t.id}">
+          <div class="task-check" onclick="toggleTask(${t.id}, ${t.is_done})">
+            ${t.is_done ? '✓' : ''}
+          </div>
+          <div class="task-info">
+            <div class="task-title">${escHtml(t.title)}</div>
+            ${t.description ? `<div class="task-sub">${escHtml(t.description)}</div>` : ''}
+          </div>
+          <div class="task-time">${t.estimated_minutes}m</div>
+          <button class="btn-delete" onclick="deleteTask(${t.id})" title="Delete">🗑</button>
+        </div>
+      `).join('');
+    }
+
+    window.addTask = async () => {
+      const title = document.getElementById('task-title').value.trim();
+      const mins = parseFloat(document.getElementById('task-mins').value) || 25;
+      const desc = document.getElementById('task-desc').value.trim();
+      if (!title) { toast('Give your task a name first! 🙄', 'error'); return; }
+      try {
+        await api.createTask({ title, description: desc || null, estimated_minutes: mins });
+        document.getElementById('task-title').value = '';
+        document.getElementById('task-desc').value = '';
+        toast('Task added! Now actually do it 😤');
+        await loadTasks();
+        await loadStats();
+      } catch(e) { toast(e.message, 'error'); }
+    };
+
+    window.toggleTask = async (id, isDone) => {
+      if (isDone) return;
+      try {
+        await api.completeTask(id);
+        await loadTasks();
+        await loadStats();
+        toast(getCompletionTaunt());
+        loadLeaderboard(); // refresh ranks after score changes
+      } catch(e) { toast(e.message, 'error'); }
+    };
+
+    window.deleteTask = async (id) => {
+      try {
+        await api.deleteTask(id);
+        const el = document.getElementById(`task-${id}`);
+        if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = 'all 0.2s'; setTimeout(() => el.remove(), 200); }
+        await loadStats();
+        toast('Task deleted 🗑');
+      } catch(e) { toast(e.message, 'error'); }
+    };
+
+    function getCompletionTaunt() {
+      const msgs = [
+        '✅ Task done! Locked in! 💀',
+        '🔥 Let\'s go! You\'re on fire!',
+        '💪 Grind mode activated!',
+        '📚 Nerd behavior. Respect.',
+        '😤 That\'s how we do it!',
+        '🚀 Your score just went UP!',
+        '👑 Future scholar behavior.',
+      ];
+      return msgs[Math.floor(Math.random() * msgs.length)];
+    }
+
+    // ── Leaderboard ──
+    async function loadLeaderboard() {
+      try {
+        const lb = await api.getLeaderboard();
+        const container = document.getElementById('leaderboard-list');
+        if (!lb.length) { container.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No warriors yet</div>'; return; }
+        const rankIcon = ['🥇','🥈','🥉'];
+        const rankClass = ['top-1','top-2','top-3'];
+        container.innerHTML = lb.map((u, i) => `
+          <div class="lb-row ${u.username === currentUser?.username ? 'is-me' : ''}" style="animation-delay:${i*0.05}s">
+            <div class="lb-rank ${rankClass[i] || ''}">${rankIcon[i] || u.rank}</div>
+            <div class="lb-info">
+              <div class="lb-name">${escHtml(u.username)} ${u.username === currentUser?.username ? '← you' : ''}</div>
+              <div class="lb-badge">${escHtml(u.badge)}</div>
+            </div>
+            <div class="lb-score">
+              <div>${Math.round(u.study_score)}</div>
+              <div class="lb-score-label">mins</div>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) { console.error(e); }
+    }
+
+    // ── Friend Compare ──
+    window.loadFriend = async () => {
+      const username = document.getElementById('friend-username').value.trim();
+      if (!username) return;
+      try {
+        const friendStats = await api.getUserStats(username);
+        const vsArea = document.getElementById('vs-area');
+        vsArea.style.display = 'flex';
+
+        const meScore = myStats?.study_score || 0;
+        const friendScore = friendStats.study_score;
+        const maxScore = Math.max(meScore, friendScore, 1);
+
+        document.getElementById('me-name').textContent = `You (${myStats?.username || '?'})`;
+        document.getElementById('me-score').textContent = `${Math.round(meScore)} min`;
+        document.getElementById('me-bar').style.width = `${(meScore / maxScore) * 100}%`;
+
+        document.getElementById('friend-name').textContent = friendStats.username;
+        document.getElementById('friend-score').textContent = `${Math.round(friendScore)} min`;
+        document.getElementById('friend-bar').style.width = `${(friendScore / maxScore) * 100}%`;
+
+        document.getElementById('battle-msg').textContent = getBattleMessage(meScore, friendScore, friendStats.username);
+      } catch(e) { toast(`User "${username}" not found 👀`, 'error'); }
+    };
+
+    function getBattleMessage(meScore, friendScore, friendName) {
+      const diff = meScore - friendScore;
+      if (diff > 100) return `🔥 You're absolutely COOKING ${friendName}!`;
+      if (diff > 30) return `💪 Keep grinding, you're ahead!`;
+      if (diff > 0) return `😤 Barely ahead. Don't relax!`;
+      if (diff === 0) return `⚔️ It's tied! Someone has to blink first!`;
+      if (diff > -30) return `😰 ${friendName} is slightly ahead. Lock in!`;
+      if (diff > -100) return `😭 Bro you're getting cooked. Time to study!`;
+      return `💀 ${friendName} is DESTROYING you. Close the Instagram NOW.`;
+    }
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Enter to add task
+    document.getElementById('task-title').addEventListener('keypress', e => { if (e.key === 'Enter') window.addTask(); });
+
+    // Init
+    (async () => {
+      await loadStats();
+      await loadTasks();
+      await loadLeaderboard();
+    })();
+  </script>
+</body>
+</html>
