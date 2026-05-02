@@ -1,8 +1,0 @@
-[build]
-  builder = "python"
-
-[build.python]
-  version = "3.11"
-
-[deploy]
-  start = "bash start.sh"
