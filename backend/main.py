@@ -10,7 +10,6 @@ from core.config import settings
 from database.session import create_tables
 from routers import auth_router, users_router, tasks_router
 
-# ADD THIS IMPORT for the reset endpoint
 from database.session import AsyncSessionLocal
 from models.user import User
 from models.task import Task
@@ -26,7 +25,6 @@ async def lifespan(app: FastAPI):
     print("👋 Shutting down...")
 
 
-# Initialize FastAPI app - THIS MUST COME FIRST
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
@@ -34,7 +32,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,10 +40,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount API routers
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(tasks_router, prefix="/api")
+
 
 @app.get("/api/nuke")
 async def nuke_database():
@@ -54,7 +51,6 @@ async def nuke_database():
     import sqlite3
     import os
     
-    # Find the database file
     db_paths = [
         "study_battle.db",
         "backend/study_battle.db", 
@@ -72,14 +68,19 @@ async def nuke_database():
     
     return {"message": "No database file found to delete"}
 
-# ADD THE RESET ENDPOINT HERE - AFTER app is created
+
+@app.get("/api/init-db")
+async def init_database():
+    """Force create all tables"""
+    await create_tables()
+    return {"message": "✅ Database tables recreated!"}
+
+
 @app.post("/api/reset")
 async def reset_database():
     """Delete all users and tasks (for testing)"""
     async with AsyncSessionLocal() as db:
-        # Delete all tasks first (due to foreign key)
         await db.execute(delete(Task))
-        # Delete all users
         await db.execute(delete(User))
         await db.commit()
     return {"message": "✅ All data cleared! Database is now empty."}
@@ -87,7 +88,6 @@ async def reset_database():
 
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint."""
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
 
