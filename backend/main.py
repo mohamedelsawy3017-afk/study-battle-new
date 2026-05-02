@@ -64,7 +64,7 @@ if os.path.exists(frontend_dir):
     @app.get("/")
     async def serve_index():
         return FileResponse(os.path.join(frontend_dir, "index.html"))
-
+# h
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
         file_path = os.path.join(frontend_dir, full_path)
