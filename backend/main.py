@@ -44,7 +44,20 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(tasks_router, prefix="/api")
 
-
+@app.get("/api/force-delete-users")
+async def force_delete_users():
+    """Delete specific users using raw SQL"""
+    from sqlalchemy import text
+    
+    async with AsyncSessionLocal() as db:
+        # Delete tasks for these users
+        await db.execute(text("DELETE FROM tasks WHERE user_id IN (SELECT id FROM users WHERE username IN ('test', 'mohamed_mosbah'))"))
+        # Delete the users
+        result = await db.execute(text("DELETE FROM users WHERE username IN ('test', 'mohamed_mosbah')"))
+        await db.commit()
+        
+        return {"message": f"✅ Deleted {result.rowcount} users"}
+    
 @app.get("/api/nuke")
 async def nuke_database():
     """COMPLETELY WIPE the database - Use with caution!"""
