@@ -50,8 +50,14 @@ async def health_check():
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
 
-# Serve frontend static files
-frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+# Serve frontend static files - Railway compatible
+backend_dir = os.path.dirname(__file__)
+frontend_dir = os.path.join(os.path.dirname(backend_dir), "frontend")
+
+# Also check if frontend is in same directory (Railway structure)
+if not os.path.exists(frontend_dir):
+    frontend_dir = os.path.join(backend_dir, "frontend")
+
 if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
@@ -65,7 +71,6 @@ if os.path.exists(frontend_dir):
         if os.path.exists(file_path) and os.path.isfile(file_path):
             return FileResponse(file_path)
         return FileResponse(os.path.join(frontend_dir, "index.html"))
-
 
 if __name__ == "__main__":
     import uvicorn
